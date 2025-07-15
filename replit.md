@@ -7,6 +7,10 @@ This is a full-stack web application designed to process staff punch data from E
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+File size requirements: Support for 35,000+ rows (70 people × 30 days)
+User-friendly single-page application with no multiple pages
+Automatic shift detection with manual override capability
+Non-technical users should be able to operate the system easily
 
 ## System Architecture
 

@@ -8,6 +8,7 @@ export const shifts = pgTable("shifts", {
   startTime: text("start_time").notNull(), // HH:MM format
   endTime: text("end_time").notNull(), // HH:MM format
   isOvernight: boolean("is_overnight").notNull().default(false),
+  sessionId: text("session_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

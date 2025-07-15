@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import multer from "multer";
@@ -86,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload endpoint
-  app.post("/api/upload", upload.single('file'), async (req, res) => {
+  app.post("/api/upload", upload.single('file'), async (req: Request & { file?: Express.Multer.File }, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -163,12 +163,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       let processed = 0;
-      for (const [key, records] of groupedRecords) {
-        const checkIns = records.filter(r => r.punchState === 'Check In');
-        const checkOuts = records.filter(r => r.punchState === 'Check Out');
+      for (const [key, records] of Array.from(groupedRecords.entries())) {
+        const checkIns = records.filter((r: any) => r.punchState === 'Check In');
+        const checkOuts = records.filter((r: any) => r.punchState === 'Check Out');
 
         for (const checkIn of checkIns) {
-          const matchingCheckOut = checkOuts.find(co => 
+          const matchingCheckOut = checkOuts.find((co: any) => 
             co.employeeId === checkIn.employeeId && 
             co.date === checkIn.date
           );

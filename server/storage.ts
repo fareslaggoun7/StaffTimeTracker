@@ -49,7 +49,6 @@ export class MemStorage implements IStorage {
       code: "Night Shift",
       startTime: "20:00",
       endTime: "06:00",
-      isOvernight: true,
       sessionId: "default"
     });
     
@@ -57,7 +56,6 @@ export class MemStorage implements IStorage {
       code: "Day Shift",
       startTime: "08:00",
       endTime: "17:00",
-      isOvernight: false,
       sessionId: "default"
     });
   }
@@ -127,6 +125,11 @@ export class MemStorage implements IStorage {
       const newRecord: ProcessedRecord = {
         ...record,
         id,
+        shiftCode: record.shiftCode || null,
+        shiftStartDateTime: record.shiftStartDateTime || null,
+        shiftEndDateTime: record.shiftEndDateTime || null,
+        actualCheckIn: record.actualCheckIn || null,
+        actualCheckOut: record.actualCheckOut || null,
         createdAt: new Date(),
       };
       this.processedRecords.set(id, newRecord);
@@ -161,6 +164,7 @@ export class MemStorage implements IStorage {
     const newSettings: ProcessingSettings = {
       ...settings,
       id,
+      gracePeriodMinutes: settings.gracePeriodMinutes || 15,
       createdAt: new Date(),
     };
     this.processingSettings.set(id, newSettings);

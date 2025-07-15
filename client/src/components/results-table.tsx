@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { ProcessedRecord } from '@shared/schema';
+import { ProcessedRecord, Shift } from '@shared/schema';
 import { FilterStatus } from '@/types';
 
 interface ResultsTableProps {
@@ -21,6 +21,10 @@ export function ResultsTable({ sessionId }: ResultsTableProps) {
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['/api/processed-records', sessionId],
+  });
+
+  const { data: shifts = [] } = useQuery({
+    queryKey: ['/api/shifts', sessionId],
   });
 
   const updateRecordMutation = useMutation({
@@ -201,8 +205,11 @@ export function ResultsTable({ sessionId }: ResultsTableProps) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="unmatched">Unmatched</SelectItem>
-                      <SelectItem value="Night Shift">Night Shift</SelectItem>
-                      <SelectItem value="Day Shift">Day Shift</SelectItem>
+                      {shifts.map((shift: Shift) => (
+                        <SelectItem key={shift.id} value={shift.code}>
+                          {shift.code}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </td>

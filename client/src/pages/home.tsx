@@ -65,7 +65,29 @@ export default function Home() {
 
         {/* Step 2: Configure Shifts */}
         {currentStep >= 2 && (
-          <ShiftManagement sessionId={sessionId} />
+          <div>
+            <ShiftManagement sessionId={sessionId} />
+            {currentStep === 2 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Process</h3>
+                      <p className="text-sm text-gray-600">
+                        Your shifts are configured. Click "Continue" to process your data.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => setCurrentStep(3)}
+                      className="bg-primary text-white"
+                    >
+                      Continue to Processing
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Step 3: Process & Review */}

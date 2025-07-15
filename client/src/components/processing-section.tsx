@@ -26,13 +26,12 @@ export function ProcessingSection({ sessionId, stats, onProcessingComplete }: Pr
   const processDataMutation = useMutation({
     mutationFn: () => apiRequest('POST', '/api/process', { sessionId }),
     onSuccess: (data) => {
-      const result = data.json();
-      onProcessingComplete(result.stats);
+      onProcessingComplete(data.stats);
       queryClient.invalidateQueries({ queryKey: ['/api/processed-records', sessionId] });
       setProcessing(false);
       toast({
         title: "Processing completed!",
-        description: `Processed ${result.stats.total} records successfully.`,
+        description: `Processed ${data.stats.total} records successfully.`,
       });
     },
     onError: (error) => {
