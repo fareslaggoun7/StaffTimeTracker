@@ -43,6 +43,7 @@ export function ShiftManagement({ sessionId }: ShiftManagementProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/shifts', sessionId] });
       setNewShift({ code: '', startTime: '', endTime: '', sessionId });
+      setEditingShift(null);
       toast({ title: "Shift created successfully!" });
     },
     onError: (error) => {
@@ -96,7 +97,9 @@ export function ShiftManagement({ sessionId }: ShiftManagementProps) {
   });
 
   const handleCreateShift = () => {
-    if (!newShift.code || !newShift.startTime || !newShift.endTime) {
+    const shiftToCreate = editingShift?.id === -1 ? editingShift : newShift;
+    
+    if (!shiftToCreate.code || !shiftToCreate.startTime || !shiftToCreate.endTime) {
       toast({
         title: "Please fill in all fields",
         variant: "destructive",
@@ -104,7 +107,12 @@ export function ShiftManagement({ sessionId }: ShiftManagementProps) {
       return;
     }
 
-    createShiftMutation.mutate(newShift as InsertShift);
+    createShiftMutation.mutate({
+      code: shiftToCreate.code,
+      startTime: shiftToCreate.startTime,
+      endTime: shiftToCreate.endTime,
+      sessionId,
+    });
   };
 
   const handleUpdateShift = (shift: Shift) => {
@@ -183,6 +191,14 @@ export function ShiftManagement({ sessionId }: ShiftManagementProps) {
                   type="time"
                   value={editingShift.startTime}
                   onChange={(e) => setEditingShift({ ...editingShift, startTime: e.target.value })}
+                  onKeyDown={(e) => {
+                    // Auto-focus to end time when user presses Tab or Enter
+                    if (e.key === 'Tab' || e.key === 'Enter') {
+                      setTimeout(() => {
+                        document.getElementById('endTime')?.focus();
+                      }, 0);
+                    }
+                  }}
                 />
               </div>
               <div>
@@ -219,12 +235,6 @@ export function ShiftManagement({ sessionId }: ShiftManagementProps) {
                 <Button
                   onClick={() => {
                     if (editingShift.id === -1) {
-                      setNewShift({
-                        code: editingShift.code,
-                        startTime: editingShift.startTime,
-                        endTime: editingShift.endTime,
-                        sessionId,
-                      });
                       handleCreateShift();
                     } else {
                       handleUpdateShift(editingShift);
