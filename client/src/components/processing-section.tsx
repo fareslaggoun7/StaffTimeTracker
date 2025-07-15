@@ -24,8 +24,11 @@ export function ProcessingSection({ sessionId, stats, onProcessingComplete }: Pr
   const ws = useWebSocket(sessionId);
 
   const processDataMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/process', { sessionId }),
-    onSuccess: (data) => {
+    mutationFn: async () => {
+      const res = await apiRequest('POST', '/api/process', { sessionId });
+      return res.json();
+    },
+    onSuccess: (data: { stats: ProcessingStats }) => {
       onProcessingComplete(data.stats);
       queryClient.invalidateQueries({ queryKey: ['/api/processed-records', sessionId] });
       setProcessing(false);

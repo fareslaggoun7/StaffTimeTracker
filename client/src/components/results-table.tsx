@@ -19,11 +19,11 @@ export function ResultsTable({ sessionId }: ResultsTableProps) {
   const recordsPerPage = 10;
   const queryClient = useQueryClient();
 
-  const { data: records = [], isLoading } = useQuery({
+  const { data: records = [], isLoading } = useQuery<ProcessedRecord[]>({
     queryKey: ['/api/processed-records', sessionId],
   });
 
-  const { data: shifts = [] } = useQuery({
+  const { data: shifts = [] } = useQuery<Shift[]>({
     queryKey: ['/api/shifts', sessionId],
   });
 

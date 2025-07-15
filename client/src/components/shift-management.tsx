@@ -24,11 +24,11 @@ export function ShiftManagement({ sessionId }: ShiftManagementProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: shifts = [] } = useQuery({
+  const { data: shifts = [] } = useQuery<Shift[]>({
     queryKey: ['/api/shifts', sessionId],
   });
 
-  const { data: settings } = useQuery({
+  const { data: settings } = useQuery<{ gracePeriodMinutes: number } | undefined>({
     queryKey: ['/api/settings', sessionId],
   });
 
