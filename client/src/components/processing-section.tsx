@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Play, RefreshCw, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -24,8 +24,11 @@ export function ProcessingSection({ sessionId, stats, onProcessingComplete }: Pr
   const ws = useWebSocket(sessionId);
 
   const processDataMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/process', { sessionId }),
-    onSuccess: (data) => {
+    mutationFn: async () => {
+      const res = await apiRequest('POST', '/api/process', { sessionId });
+      return res.json();
+    },
+    onSuccess: (data: { stats: ProcessingStats }) => {
       onProcessingComplete(data.stats);
       queryClient.invalidateQueries({ queryKey: ['/api/processed-records', sessionId] });
       setProcessing(false);
@@ -45,11 +48,19 @@ export function ProcessingSection({ sessionId, stats, onProcessingComplete }: Pr
   });
 
   // Listen for WebSocket progress updates
-  if (ws) {
-    ws.on('progress', (progressData: ProcessingProgress) => {
+  useEffect(() => {
+    if (!ws) return;
+
+    const handleProgress = (progressData: ProcessingProgress) => {
       setProgress(progressData);
-    });
-  }
+    };
+
+    ws.on('progress', handleProgress);
+
+    return () => {
+      ws.off('progress', handleProgress);
+    };
+  }, [ws]);
 
   const handleProcessData = () => {
     setProcessing(true);
