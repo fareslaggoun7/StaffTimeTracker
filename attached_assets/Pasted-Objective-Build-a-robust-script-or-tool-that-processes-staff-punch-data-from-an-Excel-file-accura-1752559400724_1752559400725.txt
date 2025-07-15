@@ -1,0 +1,69 @@
+Objective:
+Build a robust script or tool that processes staff punch data from an Excel file, accurately matches each punch-in to the correct shift—including overnight shifts that span two days—and flags late or unmatched cases according to clearly defined business rules.
+________________________________________
+1. Data Inputs
+a. Attendance Excel File
+The system receives a raw Excel file structured as follows:
+Employee ID	First Name	Department	Date	Time	Punch State
+13006	LOK BAHADUR SHRESTHA	ZEAL-IT (HSE)	2025-05-01	14:53	Check In
+13006	LOK BAHADUR SHRESTHA	ZEAL-IT (HSE)	2025-05-01	22:54	Check Out
+Column descriptions:
+•	Employee ID: Unique identifier for each employee.
+•	First Name: Employee name.
+•	Department: Department name.
+•	Date: Date of punch (YYYY-MM-DD).
+•	Time: Time of punch (24-hour, HH:MM).
+•	Punch State: Indicates Check In or Check Out.
+b. Shift List
+Provided as a separate file/table/config, each shift entry includes:
+•	Shift Code (unique name)
+•	Start Time (e.g., 20:00)
+•	End Time (e.g., 06:00)
+Note: End Time can be on the following day for overnight shifts.
+Shifts may be updated, removed, or added at any time.
+________________________________________
+2. Business Rules
+a. Shift Assignment Logic
+•	Each Check In must be matched to the correct shift, using the following logic:
+o	Grace Period: Employees can punch in up to 15 minutes after shift start. Punch-ins exceeding this are marked “Late”.
+o	Nearest Shift: Match to the shift whose start time is closest (on the same date for day shifts, or spanning two days for overnight shifts).
+o	Overnight Shifts: Must handle shifts where Start Time is before midnight and End Time is after midnight (e.g., 20:00–06:00 next day). Punch-ins between 20:00 (day 1) and 06:00 (day 2) should be assigned to the same shift, even if the punch-in date has changed.
+o	If a punch-in cannot be matched within the 15-minute window of any shift, mark as “Unmatched”.
+b. Output Specifications
+For every matched Check In–Check Out pair, produce an output row with:
+•	Employee ID
+•	Name
+•	Department
+•	Date (of shift start)
+•	Shift Code
+•	Shift Start Date & Time (full datetime)
+•	Shift End Date & Time (full datetime)
+•	Actual Check In (datetime)
+•	Actual Check Out (datetime)
+•	Status (On-Time, Late, Unmatched)
+c. Additional Requirements
+•	Handle additional, changed, or removed shifts without code modification.
+•	Efficient for large datasets.
+•	Log or flag all unmatched or ambiguous entries.
+•	Easy configuration of shift list and grace period.
+________________________________________
+3. Deliverables
+•	Production-ready, well-commented script (Python preferred, but specify if using another language).
+•	Clear usage instructions (including how to provide shift lists and set parameters).
+•	Sample output file based on the sample data structure above.
+________________________________________
+4. Special Instructions
+•	The script must implement proper overnight shift logic, never relying on same-day only comparison. Ensure that shifts starting on one day and ending the next are handled as a single logical unit.
+•	If a Check In is missing a corresponding Check Out, log this as an exception for review.
+•	If further clarification is needed, ask for a sample Excel file or shift list template.
+________________________________________
+5. Example Scenario
+Shift Example:
+Shift Code	Start Time	End Time
+S1	20:00	06:00
+•	Employee checks in at 20:05 on May 1 → Assigned to S1, status “On-Time”.
+•	Employee checks in at 20:20 on May 1 → Assigned to S1, status “Late”.
+•	Employee checks in at 05:45 on May 2 → Assigned to S1 (previous evening's shift), status “On-Time”.
+________________________________________
+If you need any input files or templates, please request them.
+The solution must be robust, scalable, and production-grade.
