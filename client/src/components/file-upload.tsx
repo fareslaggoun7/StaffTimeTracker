@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { CloudUpload, FileSpreadsheet, CheckCircle } from 'lucide-react';
+import { CloudUpload, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import * as XLSX from 'xlsx';
 
 interface FileUploadProps {
   sessionId: string;
@@ -15,7 +16,25 @@ export function FileUpload({ sessionId, onUploadComplete }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [detectedColumns, setDetectedColumns] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const detectColumns = useCallback(async (file: File) => {
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      if (jsonData.length > 0) {
+        const headers = jsonData[0] as string[];
+        setDetectedColumns(headers);
+      }
+    } catch (error) {
+      console.error('Failed to detect columns:', error);
+    }
+  }, []);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -24,6 +43,10 @@ export function FileUpload({ sessionId, onUploadComplete }: FileUploadProps) {
     setUploadedFile(file);
     setUploading(true);
     setUploadProgress(0);
+    setDetectedColumns([]); // Reset detected columns
+
+    // Detect columns before upload
+    await detectColumns(file);
 
     try {
       const formData = new FormData();
@@ -57,7 +80,7 @@ export function FileUpload({ sessionId, onUploadComplete }: FileUploadProps) {
     } finally {
       setUploading(false);
     }
-  }, [sessionId, onUploadComplete, toast]);
+  }, [sessionId, onUploadComplete, toast, detectColumns]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -150,13 +173,29 @@ export function FileUpload({ sessionId, onUploadComplete }: FileUploadProps) {
               'Date',
               'Time',
               'Punch State'
-            ].map((column) => (
-              <div key={column} className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span className="text-gray-700">{column}</span>
-              </div>
-            ))}
+            ].map((column) => {
+              const isDetected = detectedColumns.includes(column);
+              return (
+                <div key={column} className="flex items-center space-x-2">
+                  {isDetected ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span className={`${isDetected ? 'text-green-700' : 'text-gray-500'}`}>
+                    {column}
+                  </span>
+                </div>
+              );
+            })}
           </div>
+          {detectedColumns.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-blue-200">
+              <p className="text-xs text-gray-600">
+                <strong>Detected columns:</strong> {detectedColumns.join(', ')}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
